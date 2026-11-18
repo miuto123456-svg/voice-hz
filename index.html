@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VOICE Hz BATTLE</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04060f;--navy:#0b1636;--blue:#19d3ff;--green:#39ff88;--red:#ff4d6d;--txt:#e8f4ff;--dim:#7d93b8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif;overscroll-behavior:none}
+body{background:radial-gradient(120% 70% at 50% 0,var(--navy),var(--bg) 70%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.scr{display:none;min-height:100vh;padding:20px 18px 28px;max-width:480px;margin:0 auto;flex-direction:column;gap:16px}
+.scr.on{display:flex}
+.orb{font-family:'Orbitron',sans-serif;font-weight:900}
+.logo{text-align:center;margin-top:10px;line-height:1}
+.logo b{display:block;font-size:44px;color:var(--blue);text-shadow:0 0 12px var(--blue),0 0 36px #0a8cff}
+.logo i{display:block;font-style:normal;font-size:30px;color:var(--green);text-shadow:0 0 12px var(--green);margin-top:6px;letter-spacing:.12em}
+.btn{font-family:'Orbitron','Noto Sans JP',sans-serif;font-weight:900;font-size:20px;color:#001018;background:var(--green);border:0;border-radius:14px;padding:18px;width:100%;box-shadow:0 0 18px rgba(57,255,136,.55),inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer}
+.btn:active{transform:translateY(3px)}
+.btn.b{background:var(--blue);box-shadow:0 0 18px rgba(25,211,255,.55),inset 0 -5px 0 rgba(0,0,0,.25)}
+.btn.g{background:transparent;color:var(--blue);border:2px solid var(--blue);box-shadow:none}
+.panel{border:1px solid rgba(25,211,255,.4);border-radius:14px;padding:14px;background:rgba(10,20,50,.6);font-size:14px;line-height:1.7}
+.panel h3{margin:0 0 6px;font-size:14px;color:var(--green)}
+input[type=text]{width:100%;font:700 18px 'Noto Sans JP';padding:14px;border-radius:12px;border:2px solid var(--blue);background:#050b1e;color:var(--txt);outline:none}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chips label{border:2px solid #29406e;border-radius:12px;padding:12px;text-align:center;font-weight:700;font-size:15px}
+.chips input{display:none}
+.chips input:checked+span{color:var(--green)}
+.chips label:has(input:checked){border-color:var(--green);box-shadow:0 0 12px rgba(57,255,136,.5)}
+.err{color:var(--red);font-weight:700;font-size:14px;min-height:20px}
+.hz{font-size:92px;text-align:center;color:var(--blue);text-shadow:0 0 18px var(--blue);line-height:1;transition:color .1s}
+.hz small{font-size:24px;margin-left:6px}
+.hz.up{color:#fff;text-shadow:0 0 14px #fff,0 0 40px var(--green),0 0 80px var(--green)}
+.lab{text-align:center;color:var(--dim);font-size:13px;font-weight:700}
+canvas{width:100%;height:140px;border:1px solid rgba(25,211,255,.4);border-radius:12px;background:#02050f}
+.bar{height:10px;border-radius:6px;background:#10213f;overflow:hidden}
+.bar div{height:100%;width:100%;background:linear-gradient(90deg,var(--blue),var(--green));box-shadow:0 0 12px var(--green);transform-origin:left}
+.cd{font-size:56px;text-align:center;color:var(--green);text-shadow:0 0 14px var(--green)}
+.rec{text-align:center;color:var(--red);font-weight:900;letter-spacing:.2em;animation:bl .6s infinite alternate}
+@keyframes bl{to{opacity:.25}}
+.best{text-align:center;font-size:22px;font-weight:900;color:var(--green);text-shadow:0 0 14px var(--green);animation:pop .6s both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.big{font-size:84px;text-align:center;color:#fff;text-shadow:0 0 20px var(--blue),0 0 60px var(--blue);line-height:1}
+.rk{display:flex;justify-content:space-around;gap:8px}
+.rk div{text-align:center;border:1px solid rgba(57,255,136,.5);border-radius:12px;padding:10px 14px;flex:1}
+.rk b{display:block;font-size:30px;color:var(--green)}
+.rk span{font-size:12px;color:var(--dim)}
+.tabs{display:flex;gap:6px}
+.tabs button{flex:1;font:900 14px 'Orbitron';padding:12px 0;border-radius:10px;border:2px solid #29406e;background:transparent;color:var(--dim)}
+.tabs button.on{color:var(--blue);border-color:var(--blue);box-shadow:0 0 12px rgba(25,211,255,.5)}
+.sb{background:#02050f;border:2px solid var(--blue);border-radius:12px;box-shadow:0 0 22px rgba(25,211,255,.3);overflow:hidden}
+.row{display:grid;grid-template-columns:48px 1fr auto;gap:8px;padding:10px 12px;border-bottom:1px solid #10213f;align-items:center}
+.row .n{font-family:'Orbitron';font-weight:900;color:var(--dim)}
+.row .h{font-family:'Orbitron';font-weight:900;color:var(--green);text-shadow:0 0 8px var(--green)}
+.row .p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.row.r1 .n{color:#ffd400}.row.r2 .n{color:#d6e2f0}.row.r3 .n{color:#ff9a4d}
+.row.me{background:rgba(25,211,255,.18)}
+.empty{padding:28px;text-align:center;color:var(--dim)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<section id="home" class="scr on">
+  <div class="logo orb"><b>VOICE</b><i>Hz BATTLE</i></div>
+  <div class="panel"><h3>RULE</h3>3秒間で声の最高Hzを出そう。マイクで声の高さを測り、一番高い有効な値が記録されます。ランキングには自己ベストだけが載ります。音声は端末内で解析され、送信されません。</div>
+  <div id="reg" class="panel">
+    <h3>PLAYER ENTRY</h3>
+    <input id="nick" type="text" maxlength="16" placeholder="ニックネーム（1〜16文字）" autocomplete="off">
+    <div class="chips" style="margin-top:10px">
+      <label><input type="radio" name="g" value="M"><span>男性</span></label>
+      <label><input type="radio" name="g" value="F"><span>女性</span></label>
+      <label><input type="radio" name="g" value="O"><span>その他</span></label>
+      <label><input type="radio" name="g" value="N"><span>回答しない</span></label>
+    </div>
+  </div>
+  <div id="who" class="lab" style="display:none"></div>
+  <div id="herr" class="err"></div>
+  <button class="btn" id="go">GAME START</button>
+  <button class="btn g" id="rk">RANKING</button>
+</section>
+
+<section id="play" class="scr">
+  <div class="rec" id="rec">READY…</div>
+  <div class="cd orb" id="cd">3.0</div>
+  <div class="bar"><div id="bar"></div></div>
+  <div class="lab">NOW</div>
+  <div class="hz orb" id="now">---<small>Hz</small></div>
+  <canvas id="cv" width="640" height="280"></canvas>
+  <div class="lab">MAX</div>
+  <div class="hz orb" id="max" style="font-size:56px;color:var(--green);text-shadow:0 0 14px var(--green)">---<small>Hz</small></div>
+</section>
+
+<section id="res" class="scr">
+  <div class="lab" id="rlab" style="margin-top:20px">TODAY'S MAX</div>
+  <div class="big orb" id="rhz">0.0</div>
+  <div class="lab">Hz</div>
+  <div class="best" id="rbest" style="display:none">NEW RECORD!</div>
+  <div class="lab" id="rpb"></div>
+  <div class="rk" id="rrk"></div>
+  <div class="err" id="rerr" style="text-align:center"></div>
+  <button class="btn" id="again">もう一度挑戦</button>
+  <button class="btn g" id="rk2">ランキングを見る</button>
+</section>
+
+<section id="rank" class="scr">
+  <div class="logo orb"><i style="font-size:24px;margin:0">RANKING</i></div>
+  <div class="tabs"><button data-k="M">MEN'S</button><button data-k="F">WOMEN'S</button><button data-k="A" class="on">ALL</button></div>
+  <div class="sb" id="sb"></div>
+  <div class="lab" id="myr"></div>
+  <button class="btn b" id="back">HOME</button>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+const HZ_MIN = 70, HZ_MAX = 1400, DUR = 3;
+const mem = {};
+const sto = { get(k){ try { return localStorage.getItem(k) } catch(e){ return mem[k] || null } },
+              set(k,v){ try { localStorage.setItem(k,v) } catch(e){ mem[k] = v } } };
+let P = null; try { P = JSON.parse(sto.get('vhb') || 'null') } catch(e){}
+let kind = 'A', busy = false;
+
+const API = 'https://script.google.com/macros/s/AKfycbzC_H3-O2J5W3xROJ6HJUOZR5QbBz016LhtclJWNiEc_0ylbK3ofyhMW_LZLThvx54E-w/exec';   // GAS単体で動かすときは空のまま。別ホスティングに置くときだけ /exec のURLを入れる
+const GS = window.google && google.script && google.script.run;
+const run = (fn, ...a) => GS
+  ? new Promise((ok, ng) => google.script.run.withSuccessHandler(ok).withFailureHandler(e => ng(new Error((e && e.message || '通信エラー').replace(/^Error:\s*/, '')))) [fn](...a))
+  : fetch(API, { method: 'POST', body: JSON.stringify({ fn: fn, args: a }) })
+      .then(r => r.json())
+      .then(j => { if (!j.ok) throw new Error(j.error); return j.data; })
+      .catch(e => { throw new Error(/Failed to fetch|Load failed|NetworkError/.test(e.message) ? '通信エラー。API設定を確認してください。' : e.message); });
+const show = id => { document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); scrollTo(0,0); };
+const fmt = v => v.toFixed(1);
+
+function home(){
+  $('reg').style.display = P ? 'none' : '';
+  $('who').style.display = P ? '' : 'none';
+  if (P) $('who').textContent = 'PLAYER: ' + P.nick;
+  $('herr').textContent = ''; show('home');
+}
+
+/* ---------- 基本周波数推定（正規化自己相関） ---------- */
+function detect(b, sr){
+  const N = 1600, minL = Math.floor(sr / HZ_MAX), maxL = Math.ceil(sr / HZ_MIN);
+  if (b.length < N + maxL + 2) return null;
+  let e = 0; for (let i = 0; i < N; i++) e += b[i] * b[i];
+  if (Math.sqrt(e / N) < 0.015) return null;           // 小さすぎる音は無効
+  const c = new Float32Array(maxL + 2); let best = 0;
+  for (let l = minL - 1; l <= maxL + 1; l++){
+    let s = 0, e2 = 0;
+    for (let i = 0; i < N; i++){ const y = b[i + l]; s += b[i] * y; e2 += y * y; }
+    c[l] = s / Math.sqrt(e * e2 + 1e-9);
+    if (l >= minL && l <= maxL && c[l] > best) best = c[l];
+  }
+  if (best < 0.88) return null;                         // 信頼度不足（ノイズ・非周期音）
+  for (let l = minL; l <= maxL; l++){                   // 最短ラグの山＝基本周波数（倍音/半周波の誤認を防ぐ）
+    if (c[l] >= 0.93 * best && c[l] >= c[l-1] && c[l] >= c[l+1]){
+      const a = c[l-1], m = c[l], z = c[l+1], d = (a - 2*m + z) ? (a - z) / (2 * (a - 2*m + z)) : 0;
+      const hz = sr / (l + d);
+      return hz >= HZ_MIN && hz <= HZ_MAX ? hz : null;
+    }
+  }
+  return null;
+}
+
+/* ---------- 測定 ---------- */
+async function start(){
+  if (busy) return; busy = true; $('herr').textContent = '';
+  let stream, ctx;
+  try {
+    if (!P){
+      const nick = $('nick').value.trim(), g = (document.querySelector('input[name=g]:checked') || {}).value;
+      if (!nick) throw new Error('ニックネームを入力してください。');
+      if (!g) throw new Error('性別を選択してください。');
+      P = await run('register', nick, g); sto.set('vhb', JSON.stringify(P));
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('このブラウザではマイクを使えません。HTTPSでSafari/Chromeから開いてください。');
+    try {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
+      } catch(e1){
+        if (e1.name === 'NotAllowedError' || e1.name === 'SecurityError') throw e1;
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });   // 制約を外して再試行
+      }
+    } catch(e){
+      throw new Error('マイクを使用できません。[' + e.name + '] ' + (e.message || '') + ' / https=' + isSecureContext + ' / iframe=' + (self !== top) + ' / ' + location.host);
+    }
+    const AC = window.AudioContext || window.webkitAudioContext; ctx = new AC(); await ctx.resume();
+    const an = ctx.createAnalyser(); an.fftSize = 4096; ctx.createMediaStreamSource(stream).connect(an);
+    show('play'); $('rec').textContent = 'READY…'; $('now').firstChild.nodeValue = '---'; $('max').firstChild.nodeValue = '---';
+    const token = await run('startSession', P.id);
+    await measure(an, ctx.sampleRate, token);
+  } catch(e){
+    if (!P || $('play').classList.contains('on')) show('home');
+    $('herr').textContent = e.message; if (!$('home').classList.contains('on')) home(), $('herr').textContent = e.message;
+  } finally {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (ctx) ctx.close(); busy = false;
+  }
+}
+
+function measure(an, sr, token){
+  return new Promise(done => {
+    const buf = new Float32Array(an.fftSize), cv = $('cv'), g = cv.getContext('2d');
+    let best = 0, hist = [], t0 = performance.now();
+    $('rec').textContent = '● REC  SING HIGH!';
+    (function tick(){
+      const t = (performance.now() - t0) / 1000;
+      if (t >= DUR) return finish();
+      an.getFloatTimeDomainData(buf);
+      g.clearRect(0, 0, cv.width, cv.height); g.lineWidth = 3; g.strokeStyle = '#19d3ff'; g.shadowColor = '#19d3ff'; g.shadowBlur = 12; g.beginPath();
+      for (let i = 0; i < 1024; i++){ const x = i / 1023 * cv.width, y = cv.height / 2 - buf[i] * cv.height * 1.4; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+      const hz = detect(buf, sr);
+      if (hz){ hist.push(hz); if (hist.length > 3) hist.shift(); } else hist = [];
+      $('cd').textContent = (DUR - t).toFixed(1); $('bar').style.transform = 'scaleX(' + (1 - t / DUR) + ')';
+      if (hist.length === 3 && Math.max(...hist) / Math.min(...hist) < 1.05){   // 3フレーム連続で安定した値のみ採用
+        const v = hist.slice().sort((a, b) => a - b)[1];
+        $('now').firstChild.nodeValue = fmt(v);
+        if (v > best){ best = v; $('max').firstChild.nodeValue = fmt(best); $('now').classList.add('up'); setTimeout(() => $('now').classList.remove('up'), 160); }
+      }
+      requestAnimationFrame(tick);
+    })();
+    async function finish(){
+      $('cd').textContent = '0.0'; $('bar').style.transform = 'scaleX(0)';
+      if (!best){ done(); show('home'); $('herr').textContent = '声を検出できませんでした。もっとマイクに近づいて「あー」と発声してください。'; return; }
+      best = Math.round(best * 10) / 10; result(best, token); done();
+    }
+  });
+}
+
+/* ---------- 結果 ---------- */
+async function result(hz, token){
+  show('res'); $('rbest').style.display = 'none'; $('rpb').textContent = ''; $('rrk').innerHTML = ''; $('rerr').textContent = '送信中…';
+  const t0 = performance.now();
+  (function cnt(){ const p = Math.min(1, (performance.now() - t0) / 1200); $('rhz').textContent = fmt(hz * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(cnt); })();
+  try {
+    const r = await run('submitScore', P.id, token, hz);
+    $('rerr').textContent = '';
+    if (r.updated) $('rbest').style.display = 'block';
+    $('rpb').textContent = '自己ベスト ' + fmt(r.best) + ' Hz';
+    const box = (v, l) => '<div><b class="orb">' + v + '</b><span>' + l + '</span></div>';
+    $('rrk').innerHTML = box(r.rankAll ? r.rankAll + '位' : '-', 'ALL') + (r.rankG ? box(r.rankG + '位', r.gLabel === '男性' ? "MEN'S" : "WOMEN'S") : '');
+  } catch(e){ $('rerr').textContent = '記録を送れませんでした: ' + e.message; }
+}
+
+/* ---------- ランキング ---------- */
+async function board(k){
+  kind = k; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  const sb = $('sb'); sb.innerHTML = '<div class="empty">LOADING…</div>'; $('myr').textContent = '';
+  try {
+    const r = await run('getRanking', k, P ? P.id : null); sb.innerHTML = '';
+    if (!r.list.length) sb.innerHTML = '<div class="empty">まだ記録がありません。一番乗りを狙おう！</div>';
+    r.list.forEach(x => {
+      const d = document.createElement('div'); d.className = 'row' + (x.rank <= 3 ? ' r' + x.rank : '') + (x.me ? ' me' : '');
+      [['n', x.rank], ['p', x.nick], ['h', fmt(x.hz) + ' Hz']].forEach(([c, t]) => { const s = document.createElement('span'); s.className = c; s.textContent = t; d.appendChild(s); });
+      sb.appendChild(d);
+    });
+    if (r.myRank) $('myr').textContent = 'あなたの順位: ' + r.myRank + '位';
+  } catch(e){ sb.innerHTML = ''; const d = document.createElement('div'); d.className = 'empty'; d.textContent = e.message; sb.appendChild(d); }
+}
+function ranking(){ show('rank'); board(kind); }
+
+$('go').onclick = start; $('again').onclick = start;
+$('rk').onclick = ranking; $('rk2').onclick = ranking; $('back').onclick = home;
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => board(b.dataset.k));
+home();
+</script>
+</body>
+</html>
